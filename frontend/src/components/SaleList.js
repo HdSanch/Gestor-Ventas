@@ -10,8 +10,9 @@ function SaleList() {
 
   const fetchSales = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/sales');
-      setSales(res.data);
+      const res = await axios.get('https://mmtkdj1aj0.execute-api.us-east-1.amazonaws.com/lab/sales');
+      console.log('Respuesta API:', res.data);
+      setSales(JSON.parse(res.data.body));
     } catch (error) {
       console.error('Error cargando ventas', error);
     }
@@ -22,8 +23,9 @@ function SaleList() {
       <h2>Ventas Registradas</h2>
       <ul>
         {sales.map((sale) => (
-          <li key={sale.id}>
-            {sale.product} - Cantidad: {sale.quantity} - Precio: ${sale.price.toFixed(2)}
+          <li key={`${sale.nombre}-${sale.cantidad}-${sale.precio}`}>
+            {sale.nombre} - Cantidad: {sale.cantidad} - Precio: $
+            {typeof sale.precio === 'number' ? sale.precio.toFixed(2) : 'N/A'}
           </li>
         ))}
       </ul>

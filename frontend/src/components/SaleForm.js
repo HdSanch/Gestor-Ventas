@@ -2,24 +2,25 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function SaleForm() {
-  const [product, setProduct] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(0);
+  const [nombre, setNombre] = useState('');
+  const [cantidad, setCantidad] = useState(1);
+  const [precio, setPrecio] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8080/api/sales', {
-        product,
-        quantity: Number(quantity),
-        price: Number(price),
+      await axios.post('https://mmtkdj1aj0.execute-api.us-east-1.amazonaws.com/lab/postsales', {
+        nombre,
+        cantidad: Number(cantidad),
+        precio: Number(precio),
       });
       alert('Venta registrada');
-      setProduct('');
-      setQuantity(1);
-      setPrice(0);
+      setNombre('');
+      setCantidad(1);
+      setPrecio(0);
     } catch (error) {
-      alert('Error al registrar venta');
+      console.error('Error al registrar venta:', error.response || error.message);
+      alert('Error al registrar venta: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -27,26 +28,26 @@ function SaleForm() {
     <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
       <input
         type="text"
-        placeholder="Producto"
-        value={product}
-        onChange={(e) => setProduct(e.target.value)}
+        placeholder="Nombre del producto"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
         required
       />
       <input
         type="number"
         placeholder="Cantidad"
-        value={quantity}
+        value={cantidad}
         min={1}
-        onChange={(e) => setQuantity(e.target.value)}
+        onChange={(e) => setCantidad(Number(e.target.value))}
         required
       />
       <input
         type="number"
         placeholder="Precio"
-        value={price}
+        value={precio}
         min={0}
         step="0.01"
-        onChange={(e) => setPrice(e.target.value)}
+        onChange={(e) => setPrecio(Number(e.target.value))}
         required
       />
       <button type="submit">Agregar Venta</button>

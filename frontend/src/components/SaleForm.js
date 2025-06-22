@@ -1,26 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import axios from "axios"
 import "./SaleForm.css"
 
-function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
+function SaleForm({ onSaveComplete }) {
   const [nombre, setNombre] = useState("")
   const [cantidad, setCantidad] = useState(1)
   const [precio, setPrecio] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  useEffect(() => {
-    if (editingSale) {
-      setNombre(editingSale.nombre)
-      setCantidad(editingSale.cantidad)
-      setPrecio(editingSale.precio)
-    } else {
-      setNombre("")
-      setCantidad(1)
-      setPrecio(0)
-    }
-  }, [editingSale])
 
   const showToast = (message, type = "success") => {
     const toast = document.createElement("div")
@@ -51,63 +39,36 @@ function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
     setIsSubmitting(true)
 
     try {
-      if (editingSale) {
-        const updatedSale = {
-          ...editingSale,
-          nombre,
-          cantidad: Number(cantidad),
-          precio: Number(precio),
-        }
-        onSaveComplete(updatedSale, "update")
-        showToast("Venta actualizada exitosamente")
-      } else {
-        await axios.post("https://mmtkdj1aj0.execute-api.us-east-1.amazonaws.com/lab/postsales", {
-          nombre,
-          cantidad: Number(cantidad),
-          precio: Number(precio),
-        })
-        showToast("Venta registrada exitosamente")
+      await axios.post("https://mmtkdj1aj0.execute-api.us-east-1.amazonaws.com/lab/postsales", {
+        nombre,
+        cantidad: Number(cantidad),
+        precio: Number(precio),
+      })
+      showToast("Venta registrada exitosamente")
+      if (typeof onSaveComplete === "function") {
         onSaveComplete(null, "create")
       }
-
       setNombre("")
       setCantidad(1)
       setPrecio(0)
     } catch (error) {
       console.error("Error:", error)
-      showToast("Error al procesar la venta", "error")
+      showToast("Error al registrar la venta", "error")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleCancel = () => {
-    setNombre("")
-    setCantidad(1)
-    setPrecio(0)
-    onCancelEdit()
-  }
-
-  const isEditing = !!editingSale
-
   return (
-    <div className={`sale-form-container ${isEditing ? "editing" : ""}`}>
-      <div className={`sale-form-header ${isEditing ? "editing" : ""}`}>
+    <div className="sale-form-container">
+      <div className="sale-form-header">
         <div className="sale-form-icon">
           <svg>
-            {isEditing ? (
-              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-            ) : (
-              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-            )}
+            <path d="M12 5v14m7-7H5" />
           </svg>
         </div>
-        <h2 className="sale-form-title">{isEditing ? "Editar Venta" : "Nueva Venta"}</h2>
-        <p className="sale-form-subtitle">
-          {isEditing
-            ? "Actualiza los detalles de la venta seleccionada"
-            : "Registra una nueva transacción en el sistema"}
-        </p>
+        <h2 className="sale-form-title">Nueva Venta</h2>
+        <p className="sale-form-subtitle">Registra una nueva transacción en el sistema</p>
       </div>
 
       <form onSubmit={handleSubmit} className="sale-form">
@@ -120,7 +81,7 @@ function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
             onChange={(e) => setNombre(e.target.value)}
             required
             disabled={isSubmitting}
-            className={`form-input ${isEditing ? "editing" : ""}`}
+            className="form-input"
           />
         </div>
 
@@ -134,7 +95,7 @@ function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
             onChange={(e) => setCantidad(Number(e.target.value))}
             required
             disabled={isSubmitting}
-            className={`form-input ${isEditing ? "editing" : ""}`}
+            className="form-input"
           />
         </div>
 
@@ -149,20 +110,12 @@ function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
             onChange={(e) => setPrecio(Number(e.target.value))}
             required
             disabled={isSubmitting}
-            className={`form-input ${isEditing ? "editing" : ""}`}
+            className="form-input"
           />
         </div>
 
         <div className="button-group">
-          {isEditing && (
-            <button type="button" onClick={handleCancel} disabled={isSubmitting} className="btn btn-cancel">
-              <svg className="btn-icon">
-                <path d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Cancelar
-            </button>
-          )}
-          <button type="submit" disabled={isSubmitting} className={`btn btn-primary ${isEditing ? "editing" : ""}`}>
+          <button type="submit" disabled={isSubmitting} className="btn btn-primary">
             {isSubmitting ? (
               <>
                 <svg className="btn-icon spinning">
@@ -173,13 +126,9 @@ function SaleForm({ editingSale, onSaveComplete, onCancelEdit }) {
             ) : (
               <>
                 <svg className="btn-icon">
-                  {isEditing ? (
-                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z M17 21v-8H7v8 M7 3v5h8" />
-                  ) : (
-                    <path d="M12 5v14m7-7H5" />
-                  )}
+                  <path d="M12 5v14m7-7H5" />
                 </svg>
-                {isEditing ? "Actualizar" : "Registrar"}
+                Registrar
               </>
             )}
           </button>

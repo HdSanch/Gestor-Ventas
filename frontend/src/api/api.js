@@ -47,6 +47,7 @@ export const createStore = (storeData) =>
 export const getAllStores = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
+  console.log("getAllStores - Value of x-role header:", role); 
 
   return fetch(`${API_BASE}/get_all_stores`, {
     method: "GET",
@@ -82,13 +83,16 @@ export const deleteStore = (storeId) => {
 export const getAllProducts = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
+  const storeId = user?.storeId; 
 
-  return fetch(`${API_BASE}/get_all_products`, {
+  const query = role === "vendedor" && storeId ? `?storeId=${storeId}` : '';
+  
+  return fetch(`${API_BASE}/get_all_products${query}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "x-role": role
-    }
+      "x-role": role,
+    },
   });
 };
 
@@ -111,3 +115,32 @@ export const deleteProduct = (productId) => {
     method: "DELETE"
   });
 };
+
+// sales
+
+export const getSales = (role, storeId) => {
+  const query = role === "admin" ? `role=admin` : `role=vendedor&storeId=${storeId}`;
+  return fetch(`${API_BASE}/get_all_sales?${query}`);
+};
+
+export const createSale = (saleData) =>
+  fetch(`${API_BASE}/create_sale`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(saleData),
+  });
+
+export const updateSale = (saleData) =>
+  fetch(`${API_BASE}/sales`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(saleData),
+  });
+
+export const deleteSale = (saleId) =>
+  fetch(`${API_BASE}/delete_sale?saleId=${saleId}`, {
+    method: "DELETE"
+  });
+
+  export const getProductsByStore = (storeId) =>
+  fetch(`${API_BASE}/get_prd_store?storeId=${storeId}`);

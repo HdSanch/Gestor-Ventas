@@ -1,0 +1,69 @@
+/* Style the main form container */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* Style the input fields inside the form */
+.login-form input {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Style the input fields when they are focused */
+.login-form input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+/* Style the button inside the form */
+.login-form button {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  letter-spacing: 0.5px;
+}
+
+/* Style the button on hover */
+.login-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Style the button when it's clicked */
+.login-form button:active {
+  transform: scale(0.99);
+}
+
+/* Style the error message paragraph inside the form */
+.login-form p {
+  color: #d9534f;
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}

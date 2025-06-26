@@ -4,6 +4,7 @@ import UserForm from "./Users/UserForm.jsx";
 import UserList from "./Users/UserList.jsx";
 import StoreList from "./Stores/StoreList.jsx";
 import ProductList from "./Products/ProductList";
+import SalesList from "./Sales/SalesList.jsx";
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -21,11 +22,15 @@ const Dashboard = () => {
           <StoreList />
           <h2>Gestión de Productos</h2>
           <ProductList />
+          <h2>Gestión de Ventas</h2>
+          <SalesList />
         </>
       ) : (
         <>
           <h2>Gestión de Productos</h2>
           <ProductList />
+          <h2>Gestión de Ventas</h2>
+          <SalesList />
         </>
       )}
     </div>

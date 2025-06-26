@@ -76,3 +76,38 @@ export const deleteStore = (storeId) => {
     }
   });
 };
+
+//products
+
+export const getAllProducts = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role;
+
+  return fetch(`${API_BASE}/get_all_products`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "x-role": role
+    }
+  });
+};
+
+export const createProduct = (product) =>
+  fetch(`${API_BASE}/create_product`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(product),
+  });
+
+export const updateProduct = (product) =>
+  fetch(`${API_BASE}/update_product`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(product),
+  });
+
+export const deleteProduct = (productId) => {
+  return fetch(`${API_BASE}/delete_product?productId=${productId}`, {
+    method: "DELETE"
+  });
+};

@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import UserForm from "./Users/UserForm.jsx";
 import UserList from "./Users/UserList.jsx";
 import StoreList from "./Stores/StoreList.jsx";
+import ProductList from "./Products/ProductList";
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -18,9 +19,14 @@ const Dashboard = () => {
           <UserList />,
           <h2>Gestión de Tiendas</h2>
           <StoreList />
+          <h2>Gestión de Productos</h2>
+          <ProductList />
         </>
       ) : (
-        <p>No tienes permisos para crear usuarios.</p>
+        <>
+          <h2>Gestión de Productos</h2>
+          <ProductList />
+        </>
       )}
     </div>
   );

@@ -1,0 +1,152 @@
+/* Main form container */
+.sale-form {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: 30px auto;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Space between form groups */
+}
+
+/* Form heading */
+.sale-form h3 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 1.8em;
+  font-weight: 600;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+}
+
+/* Style for labels */
+.sale-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.95em;
+}
+
+/* Style for input fields and select dropdown */
+.sale-form input[type="text"],
+.sale-form input[type="number"],
+.sale-form select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 1em;
+  color: #444;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sale-form input:focus,
+.sale-form select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+/* Read-only field for the store ID for non-admins */
+.read-only-field {
+  background-color: #e9ecef;
+  padding: 12px 15px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 1em;
+  color: #555;
+}
+
+/* Style for messages (loading, error) */
+.sale-form .loading-message,
+.sale-form .error-message,
+.sale-form .info-message {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.sale-form .loading-message {
+  background-color: #e9f7ef;
+  color: #28a745;
+}
+
+.sale-form .error-message {
+  background-color: #f8d7da;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.sale-form .info-message {
+  background-color: #e0f2f7;
+  color: #17a2b8;
+}
+
+/* Button container */
+.sale-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Style for buttons */
+.sale-form button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.sale-form button[type="submit"] {
+  background-color: #28a745; /* Green for submit */
+  color: white;
+}
+
+.sale-form button[type="submit"]:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+
+.sale-form button[type="button"] { /* Cancel button */
+  background-color: #6c757d; /* Gray */
+  color: white;
+}
+
+.sale-form button[type="button"]:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+}
+
+.sale-form button:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .sale-form {
+    padding: 20px;
+    margin: 20px auto;
+  }
+  .sale-form .form-actions {
+    flex-direction: column;
+  }
+  .sale-form button {
+    width: 100%;
+  }
+}

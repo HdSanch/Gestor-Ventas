@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { getSales, deleteSale } from "../../api/api";
-import SaleForm from "./SaleForm"; // Importa el formulario
+import SaleForm from "./SaleForm";
+import "../../Styles/SalesList.css";
 
 const SalesList = () => {
   const { user, isAdmin } = useAuth();
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showForm, setShowForm] = useState(false); // State to control form visibility
 
-  const loadSales = async () => {
+  // Use useCallback to memoize the function and avoid re-creation
+  const loadSales = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -20,13 +23,11 @@ const SalesList = () => {
       }
 
       const rawData = await res.json();
-
       let salesArray = [];
       
       if (rawData && typeof rawData.body === 'string') {
         try {
           const parsedBody = JSON.parse(rawData.body);
-          
           if (Array.isArray(parsedBody)) {
             salesArray = parsedBody;
           } else if (parsedBody && Array.isArray(parsedBody.sales)) {
@@ -59,12 +60,12 @@ const SalesList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, isAdmin]);
 
-  // Carga las ventas cuando el usuario cambia
+  // Carga las ventas cuando el componente se monta o el usuario cambia
   useEffect(() => {
     loadSales();
-  }, [user]);
+  }, [loadSales]);
 
   const handleDelete = async (saleId) => {
     if (!window.confirm(`¿Estás seguro de que quieres eliminar la venta con ID ${saleId}?`)) {
@@ -73,8 +74,7 @@ const SalesList = () => {
     try {
       const response = await deleteSale(saleId);
       if (response.ok) {
-        // Vuelve a cargar la lista para ver el cambio de stock
-        loadSales();
+        loadSales(); // Reload the list
         alert("Venta eliminada y stock restaurado.");
       } else {
         const errorData = await response.json();
@@ -85,67 +85,86 @@ const SalesList = () => {
       alert(`Error al eliminar la venta: ${err.message}`);
     }
   };
-  
-  // Renderizado condicional para mostrar estado de carga/error
-  if (loading) {
-    return <p>Cargando ventas...</p>;
-  }
 
-  if (error) {
-    return <p style={{ color: 'red' }}>{error}</p>;
-  }
-  
+  const handleSaveComplete = () => {
+    setShowForm(false); // Hide form after saving
+    loadSales(); // Reload data after save
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+  };
+
   return (
-    <div>
-      <h2>Registrar Nueva Venta</h2>
-      {/* Restauramos el formulario para crear nuevas ventas.
-        Pasamos `onSaveComplete` para que la lista se actualice después de guardar.
-        `editingSale` ya no se pasa, por lo que el formulario estará en modo creación.
-      */}
-      <SaleForm
-        onSaveComplete={() => loadSales()}
-        onCancelEdit={() => {}} // No hace nada, pero es buena práctica para evitar errores
-      />
+    <div className="sales-list-container">
+      <h2>Gestión de Ventas</h2>
 
-      <hr style={{ margin: '20px 0' }} />
+      {/* Button to toggle the form */}
+      <button onClick={() => setShowForm(!showForm)} className="toggle-form-button">
+        {showForm ? "Ocultar Formulario" : "Registrar Nueva Venta"}
+      </button>
 
-      <h2>Lista de Ventas</h2>
-      <button onClick={loadSales}>Actualizar Lista</button>
-      
-      {sales.length === 0 ? (
-        <p>No hay ventas para mostrar.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio</th>
-              <th>Total</th>
-              <th>Tienda</th>
-              <th>Usuario</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.map((sale) => (
-              <tr key={sale.saleId}>
-                <td>{sale.productName}</td>
-                <td>{sale.quantity}</td>
-                <td>{sale.unitPrice}</td>
-                <td>{sale.totalPrice}</td>
-                <td>{sale.storeId}</td>
-                <td>{sale.userId}</td>
-                <td>{new Date(sale.timestamp).toLocaleString()}</td>
-                <td>
-                  <button onClick={() => handleDelete(sale.saleId)}>Eliminar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Conditional rendering for the form */}
+      {showForm && (
+        <div className="form-section">
+          <SaleForm
+            onSaveComplete={handleSaveComplete}
+            onCancelEdit={handleCancel}
+          />
+        </div>
       )}
+
+      <div className="list-section">
+        <div className="list-header">
+            <h3>Historial de Ventas</h3>
+            <button onClick={loadSales} className="refresh-button">
+                Actualizar Lista
+            </button>
+        </div>
+        
+        {loading ? (
+          <p className="state-message loading">Cargando ventas...</p>
+        ) : error ? (
+          <p className="state-message error">{error}</p>
+        ) : sales.length === 0 ? (
+          <p className="state-message empty">No hay ventas para mostrar.</p>
+        ) : (
+          <div className="table-container">
+            <table className="sales-table">
+              <thead>
+                <tr>
+                  <th>ID Venta</th>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Total</th>
+                  <th>Tienda</th>
+                  <th>Usuario</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sales.map((sale) => (
+                  <tr key={sale.saleId}>
+                    <td>{sale.saleId}</td>
+                    <td>{sale.productName}</td>
+                    <td>{sale.quantity}</td>
+                    <td>${sale.unitPrice.toFixed(2)}</td>
+                    <td>${sale.totalPrice.toFixed(2)}</td>
+                    <td>{sale.storeId}</td>
+                    <td>{sale.userId}</td>
+                    <td>{new Date(sale.timestamp).toLocaleString()}</td>
+                    <td className="actions-cell">
+                      <button onClick={() => handleDelete(sale.saleId)} className="delete-button">Eliminar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react"; // 1. Importa useCallback
+import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { getAllProducts, deleteProduct } from "../../api/api";
 import ProductForm from "./ProductForm";
+import "../../Styles/ProductList.css"; // Ensure this path is correct
 
 const ProductList = () => {
   const { user } = useAuth();
@@ -9,9 +10,10 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showForm, setShowForm] = useState(false); // New state to control form visibility
 
   /**
-   * 2. Usa useCallback para memoizar la función loadProducts.
+   * Usa useCallback para memoizar la función loadProducts.
    * Esto asegura que la función no cambie en cada render,
    * satisfaciendo la advertencia de useEffect.
    */
@@ -49,15 +51,14 @@ const ProductList = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]); // 3. Agrega 'user' como dependencia de useCallback, ya que lo usas dentro de la función.
+  }, [user]);
 
   /**
    * Effect hook to load products when the component mounts.
-   * Ahora agregamos 'loadProducts' al array de dependencias.
    */
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]); // 4. Incluye la función memoizada en el array de dependencias.
+  }, [loadProducts]);
 
   const handleDelete = async (productId) => {
     if (!window.confirm(`¿Estás seguro de que quieres eliminar el producto con ID ${productId}?`)) {
@@ -72,55 +73,96 @@ const ProductList = () => {
     }
   };
 
-  // --- Conditional Rendering based on state ---
-  if (loading) {
-    return <p>Cargando productos...</p>;
-  }
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setShowForm(true); // Show the form in edit mode
+  };
 
-  if (error) {
-    return <p style={{ color: 'red' }}>{error}</p>;
-  }
+  const handleSaveComplete = () => {
+    setShowForm(false); // Hide form after saving
+    setEditingProduct(null); // Reset editing state
+    loadProducts(); // Reload products to see changes
+  };
+
+  const handleCancelEdit = () => {
+    setShowForm(false);
+    setEditingProduct(null);
+  };
 
   return (
-    <div>
-      <h2>Productos</h2>
-      <button onClick={loadProducts}>Actualizar Lista</button>
-      <ProductForm
-        existingProduct={editingProduct}
-        onSave={loadProducts}
-        onCancel={() => setEditingProduct(null)}
-      />
-      {products.length === 0 ? (
-        <p>No hay productos para mostrar.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Precio</th>
-              <th>Stock</th>
-              <th>Tienda</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.productId}>
-                <td>{p.name}</td>
-                <td>{p.description}</td>
-                <td>{p.price}</td>
-                <td>{p.stock}</td>
-                <td>{p.storeId}</td>
-                <td>
-                  <button onClick={() => setEditingProduct(p)}>Editar</button>
-                  <button onClick={() => handleDelete(p.productId)}>Eliminar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="product-list-container">
+      <h2>Gestión de Productos</h2>
+
+      {/* Button to toggle the form's visibility */}
+      <button onClick={() => {
+          setEditingProduct(null); // Ensure a new product is created
+          setShowForm(!showForm);
+        }}
+        className="toggle-form-button"
+      >
+        {showForm ? "Ocultar Formulario" : "Agregar Nuevo Producto"}
+      </button>
+
+      {/* Conditionally render the form */}
+      {showForm && (
+        <div className="form-section">
+          <ProductForm
+            existingProduct={editingProduct}
+            onSave={handleSaveComplete}
+            onCancel={handleCancelEdit}
+          />
+        </div>
       )}
+
+      {/* Section for the product list */}
+      <div className="list-section">
+        {/* Header for the list with title and refresh button */}
+        <div className="list-header">
+            <h3>Listado de Productos</h3>
+            <button onClick={loadProducts} className="refresh-button">
+                Actualizar Lista
+            </button>
+        </div>
+      
+        {/* Conditional rendering for loading, error, and empty states */}
+        {loading ? (
+          <p className="state-message loading">Cargando productos...</p>
+        ) : error ? (
+          <p className="state-message error">{error}</p>
+        ) : products.length === 0 ? (
+          <p className="state-message empty">No hay productos para mostrar.</p>
+        ) : (
+          <div className="table-container">
+            <table className="product-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Tienda</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.productId}>
+                    <td>{p.name}</td>
+                    <td>{p.description}</td>
+                    <td>${p.price.toFixed(2)}</td>
+                    <td>{p.stock}</td>
+                    <td>{p.storeId}</td>
+                    <td className="actions-cell">
+                      <button onClick={() => handleEdit(p)} className="edit-button">Editar</button>
+                      <button onClick={() => handleDelete(p.productId)} className="delete-button">Eliminar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

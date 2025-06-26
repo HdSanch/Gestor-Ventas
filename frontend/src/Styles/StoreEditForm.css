@@ -1,0 +1,114 @@
+/* Main form container */
+.store-edit-form {
+  background-color: #f9f9f9;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin: 20px auto;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Form heading */
+.store-edit-form h3 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.6em;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+
+/* Input fields */
+.store-edit-form input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 1em;
+  color: #444;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.store-edit-form input[type="text"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.store-edit-form input[disabled] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Message paragraph */
+.store-edit-form p {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9em;
+  font-weight: 500;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+/* Button container */
+.store-edit-form div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Buttons */
+.store-edit-form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.store-edit-form button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.store-edit-form button[type="submit"]:hover:not([disabled]) {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.store-edit-form button[type="submit"]:active:not([disabled]) {
+  transform: translateY(0);
+}
+
+.store-edit-form button[type="button"] { /* Cancel button */
+  background-color: #6c757d;
+  color: white;
+}
+
+.store-edit-form button[type="button"]:hover:not([disabled]) {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+}
+
+.store-edit-form button[type="button"]:active:not([disabled]) {
+  transform: translateY(0);
+}
+
+.store-edit-form button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

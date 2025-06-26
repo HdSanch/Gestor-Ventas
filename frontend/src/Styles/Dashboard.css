@@ -1,0 +1,118 @@
+/* Dashboard layout container */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f7f9;
+  font-family: Arial, sans-serif;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px; /* **Fixed width for the sidebar** */
+  flex-shrink: 0; /* **Prevent the sidebar from shrinking** */
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Sidebar header to hold the title and user email */
+.sidebar-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #34495e;
+  margin-bottom: 20px;
+}
+
+.sidebar-header h2 {
+  color: #ecf0f1;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: #bdc3c7;
+  word-wrap: break-word; /* Prevents long emails from overflowing */
+  padding: 0 10px;
+}
+
+/* Menu list container */
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1; /* Allows the list to take up available space */
+}
+
+.menu-list li {
+  padding: 15px 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.menu-list li:hover {
+  background-color: #34495e;
+  transform: translateX(5px);
+}
+
+.menu-list li.active {
+  background-color: #3498db;
+  color: white;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+/* Logout button styling */
+.logout-button {
+  padding: 12px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #e74c3c;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+.logout-button:active {
+  transform: scale(0.98);
+}
+
+/* Main content area */
+.main-content {
+  flex-grow: 1; /* **Take up the remaining space** */
+  padding: 30px;
+  overflow-y: auto; /* **Add a scrollbar if content overflows vertically** */
+  max-height: 100vh; /* **Ensure the content area doesn't push the layout** */
+  box-sizing: border-box;
+}
+
+.main-content h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 2.5em;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.component-view {
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}

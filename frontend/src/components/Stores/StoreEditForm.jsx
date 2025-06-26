@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { updateStore } from "../../api/api";
+import "../../Styles/StoreEditForm.css"; // Import the CSS file
 
 const StoreEditForm = ({ store, onCancel, onSave }) => {
   // Inicializamos los estados con los valores de la tienda recibida.
@@ -32,6 +33,7 @@ const StoreEditForm = ({ store, onCancel, onSave }) => {
     };
 
     // Solo incluimos los campos que realmente cambiaron.
+    // Esto evita enviar datos innecesarios a la API.
     if (storeName !== store.storeName) {
       updatedFields.storeName = storeName;
     }
@@ -48,12 +50,11 @@ const StoreEditForm = ({ store, onCancel, onSave }) => {
 
     try {
       // Llamamos a la API de actualización con el ID y los campos actualizados.
-      // updateStore debe manejar el envío de storeId en el cuerpo de la solicitud.
       const res = await updateStore(updatedFields);
 
       if (res.ok) {
         setMessage("Tienda actualizada correctamente.");
-        // Recargamos la lista en el componente padre.
+        // Notificamos al componente padre para que actualice la lista.
         onSave();
         // Cerramos el formulario de edición.
         onCancel();
@@ -70,7 +71,7 @@ const StoreEditForm = ({ store, onCancel, onSave }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="store-edit-form">
       <h3>Editar Tienda</h3>
       <input
         type="text"
@@ -86,7 +87,7 @@ const StoreEditForm = ({ store, onCancel, onSave }) => {
         onChange={(e) => setAddress(e.target.value)}
         disabled={isSubmitting}
       />
-      <div>
+      <div className="form-actions">
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Guardando..." : "Guardar"}
         </button>

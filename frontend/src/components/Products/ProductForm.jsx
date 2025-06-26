@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createProduct, updateProduct, getAllStores } from "../../api/api";
 import { useAuth } from "../../hooks/useAuth";
+import "../../Styles/ProductForm.css"; // Import the CSS file
 
 const ProductForm = ({ existingProduct, onSave, onCancel }) => {
   const { user, isAdmin } = useAuth();
@@ -13,7 +14,8 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
   const [stores, setStores] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
   const [storesError, setStoresError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null); // New state for form-specific errors
 
   // Hook to fetch the list of stores if the user is an admin.
   useEffect(() => {
@@ -23,7 +25,7 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
       try {
         const res = await getAllStores();
         if (!res.ok) {
-          throw new Error('Failed to fetch stores');
+          throw new Error("Failed to fetch stores");
         }
         const data = await res.json();
         const storesArray = Array.isArray(data.stores) ? data.stores : data;
@@ -68,25 +70,32 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
         setStoreId(user?.storeId || "");
       }
     }
+    setFormError(null); // Clear form errors on product change
   }, [existingProduct, user, isAdmin, stores]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError(null); // Clear previous errors
     setIsSubmitting(true);
 
     // Form validation
     if (!name.trim() || !description.trim() || price === "" || stock === "" || !storeId) {
-      alert("Por favor, completa todos los campos.");
+      setFormError("Por favor, completa todos los campos.");
       setIsSubmitting(false);
       return;
     }
-    
+
     const priceValue = parseFloat(price);
     const stockValue = parseInt(stock, 10); // Use radix 10 for safety
 
     // Check if stock is an integer and not a float
     if (stockValue % 1 !== 0 || isNaN(stockValue)) {
-      alert("El stock debe ser un número entero.");
+      setFormError("El stock debe ser un número entero válido.");
+      setIsSubmitting(false);
+      return;
+    }
+    if (isNaN(priceValue)) {
+      setFormError("El precio debe ser un número válido.");
       setIsSubmitting(false);
       return;
     }
@@ -112,7 +121,7 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Error desconocido');
       }
-      
+
       // Call parent handlers on success
       onSave?.();
       // Reset form on successful creation, but keep editing form open.
@@ -122,92 +131,104 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
         setPrice("");
         setStock("");
       }
-      onCancel?.();
-
+      onCancel?.(); // Close the form after saving
     } catch (error) {
       console.error("Error saving product:", error);
-      alert(`Error al guardar el producto: ${error.message}`);
+      setFormError(`Error al guardar el producto: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="product-form">
       <h3>{existingProduct ? "Editar producto" : "Crear producto"}</h3>
 
-      <label htmlFor="name">Nombre:</label>
-      <input
-        id="name"
-        placeholder="Nombre del producto"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        required
-        disabled={isSubmitting}
-      />
+      {formError && <p className="form-error">{formError}</p>}
 
-      <label htmlFor="description">Descripción:</label>
-      <input
-        id="description"
-        placeholder="Descripción del producto"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        required
-        disabled={isSubmitting}
-      />
+      <div className="form-group">
+        <label htmlFor="name">Nombre:</label>
+        <input
+          id="name"
+          placeholder="Nombre del producto"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+          disabled={isSubmitting}
+        />
+      </div>
 
-      <label htmlFor="price">Precio:</label>
-      <input
-        id="price"
-        type="number"
-        placeholder="Precio (ej: 12.50)"
-        value={price}
-        onChange={e => setPrice(e.target.value)}
-        required
-        min="0"
-        step="0.01"
-        disabled={isSubmitting}
-      />
+      <div className="form-group">
+        <label htmlFor="description">Descripción:</label>
+        <textarea
+          id="description"
+          placeholder="Descripción del producto"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          required
+          disabled={isSubmitting}
+          rows="3" // Adjust rows for better visibility
+        ></textarea>
+      </div>
 
-      <label htmlFor="stock">Stock:</label>
-      <input
-        id="stock"
-        type="number"
-        placeholder="Cantidad en stock (entero)"
-        value={stock}
-        onChange={e => setStock(e.target.value)}
-        required
-        min="0"
-        step="1"
-        disabled={isSubmitting}
-      />
+      <div className="form-group">
+        <label htmlFor="price">Precio:</label>
+        <input
+          id="price"
+          type="number"
+          placeholder="Precio (ej: 12.50)"
+          value={price}
+          onChange={e => setPrice(e.target.value)}
+          required
+          min="0"
+          step="0.01"
+          disabled={isSubmitting}
+        />
+      </div>
 
-      <label htmlFor="storeId">Tienda:</label>
-      {isAdmin() ? (
-        loadingStores ? (
-          <p>Cargando tiendas...</p>
-        ) : storesError ? (
-          <p style={{ color: 'red' }}>{storesError}</p>
-        ) : stores.length > 0 ? (
-          <select id="storeId" value={storeId} onChange={e => setStoreId(e.target.value)} required disabled={isSubmitting}>
-            {stores.map(store => (
-              <option key={store.storeId} value={store.storeId}>
-                {store.storeName} (ID: {store.storeId})
-              </option>
-            ))}
-          </select>
+      <div className="form-group">
+        <label htmlFor="stock">Stock:</label>
+        <input
+          id="stock"
+          type="number"
+          placeholder="Cantidad en stock (entero)"
+          value={stock}
+          onChange={e => setStock(e.target.value)}
+          required
+          min="0"
+          step="1"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="storeId">Tienda:</label>
+        {isAdmin() ? (
+          loadingStores ? (
+            <p className="loading-message">Cargando tiendas...</p>
+          ) : storesError ? (
+            <p className="error-message">{storesError}</p>
+          ) : stores.length > 0 ? (
+            <select id="storeId" value={storeId} onChange={e => setStoreId(e.target.value)} required disabled={isSubmitting}>
+              {stores.map(store => (
+                <option key={store.storeId} value={store.storeId}>
+                  {store.storeName} (ID: {store.storeId})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <p className="info-message">No hay tiendas disponibles para asignar.</p>
+          )
         ) : (
-          <p>No hay tiendas disponibles para asignar.</p>
-        )
-      ) : (
-        <p>Tu tienda: {user?.storeId}</p>
-      )}
+          <p className="read-only-field">Tu tienda: <strong>{user?.storeId}</strong></p>
+        )}
+      </div>
 
-      <div style={{ marginTop: '15px' }}>
-        <button type="submit" disabled={isSubmitting}>
+      <div className="form-actions">
+        <button type="submit" disabled={isSubmitting} className="submit-button">
           {isSubmitting ? (existingProduct ? "Actualizando..." : "Creando...") : (existingProduct ? "Actualizar" : "Crear")}
         </button>
-        <button type="button" onClick={onCancel} disabled={isSubmitting} style={{ marginLeft: '10px' }}>
+        <button type="button" onClick={onCancel} disabled={isSubmitting} className="cancel-button">
           Cancelar
         </button>
       </div>

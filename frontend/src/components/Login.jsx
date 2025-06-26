@@ -29,25 +29,25 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Correo"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Ingresar</button>
-      {error && <p>{error}</p>}
-    </form>
-  );
+  <form className="login-form" onSubmit={handleSubmit}>
+    <input
+      type="email"
+      placeholder="Correo"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+    />
+    <input
+      type="password"
+      placeholder="Contraseña"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+    <button type="submit">Ingresar</button>
+    {error && <p>{error}</p>}
+  </form>
+);
 };
 
 export default Login;

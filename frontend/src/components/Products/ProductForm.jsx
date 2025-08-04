@@ -10,6 +10,7 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
+  const [imageUrl, setImageUrl] = useState(""); // New state for image URL
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
@@ -55,12 +56,14 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
       setDescription(existingProduct.description || "");
       setPrice(existingProduct.price !== undefined ? String(existingProduct.price) : "");
       setStock(existingProduct.stock !== undefined ? String(existingProduct.stock) : "");
+      setImageUrl(existingProduct.imageUrl || ""); // Set imageUrl for existing product
       setStoreId(existingProduct.storeId || "");
     } else {
       setName("");
       setDescription("");
       setPrice("");
       setStock("");
+      setImageUrl(""); // Reset imageUrl for new product
       // Set the storeId based on user role.
       if (isAdmin()) {
         // Admin's default storeId is the first in the list, if available.
@@ -105,6 +108,7 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
       description: description.trim(),
       price: priceValue,
       stock: stockValue,
+      imageUrl: imageUrl.trim(), // Include imageUrl in product data
       storeId: isAdmin() ? storeId : user.storeId // Enforce storeId for sellers
     };
 
@@ -130,6 +134,7 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
         setDescription("");
         setPrice("");
         setStock("");
+        setImageUrl(""); // Reset imageUrl on successful creation
       }
       onCancel?.(); // Close the form after saving
     } catch (error) {
@@ -197,6 +202,19 @@ const ProductForm = ({ existingProduct, onSave, onCancel }) => {
           required
           min="0"
           step="1"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* New form group for image URL */}
+      <div className="form-group">
+        <label htmlFor="imageUrl">URL de la Imagen:</label>
+        <input
+          id="imageUrl"
+          type="url" // Use type="url" for better validation
+          placeholder="URL de la imagen del producto (ej: https://example.com/image.png)"
+          value={imageUrl}
+          onChange={e => setImageUrl(e.target.value)}
           disabled={isSubmitting}
         />
       </div>

@@ -140,6 +140,7 @@ const ProductList = () => {
                   <th>Descripción</th>
                   <th>Precio</th>
                   <th>Stock</th>
+                  <th>Imagen</th> {/* New table header */}
                   <th>Tienda</th>
                   <th>Acciones</th>
                 </tr>
@@ -151,6 +152,15 @@ const ProductList = () => {
                     <td>{p.description}</td>
                     <td>${p.price.toFixed(2)}</td>
                     <td>{p.stock}</td>
+                    <td>
+                      {p.imageUrl && ( // Conditionally render image if imageUrl exists
+                        <img 
+                          src={p.imageUrl} 
+                          alt={p.name} 
+                          style={{ width: '50px', height: '50px', objectFit: 'cover' }} // Basic styling
+                        />
+                      )}
+                    </td>
                     <td>{p.storeId}</td>
                     <td className="actions-cell">
                       <button onClick={() => handleEdit(p)} className="edit-button">Editar</button>

@@ -9,7 +9,9 @@ const SalesList = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false); // State to control form visibility
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
   // Use useCallback to memoize the function and avoid re-creation
   const loadSales = useCallback(async () => {
@@ -87,47 +89,110 @@ const SalesList = () => {
   };
 
   const handleSaveComplete = () => {
-    setShowForm(false); // Hide form after saving
-    loadSales(); // Reload data after save
+    setShowForm(false);
+    loadSales();
   };
 
   const handleCancel = () => {
     setShowForm(false);
   };
 
+  // Función para filtrar ventas por búsqueda
+  const filteredSales = sales.filter(sale =>
+    sale.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sale.saleId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sale.storeId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calcular estadísticas
+  const totalSales = filteredSales.length;
+  const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
+  const averagePerSale = totalSales > 0 ? totalRevenue / totalSales : 0;
+
   return (
     <div className="sales-list-container">
-      <h2>Gestión de Ventas</h2>
-
-      {/* Button to toggle the form */}
-      <button onClick={() => setShowForm(!showForm)} className="toggle-form-button">
-        {showForm ? "Ocultar Formulario" : "Registrar Nueva Venta"}
-      </button>
-
-      {/* Conditional rendering for the form */}
-      {showForm && (
-        <div className="form-section">
-          <SaleForm
-            onSaveComplete={handleSaveComplete}
-            onCancelEdit={handleCancel}
-          />
+      {/* Header principal */}
+      <div className="main-header">
+        <div className="header-content">
+          <h2>Gestión de Ventas</h2>
+          <p className="sales-subtitle">Administra y registra todas las ventas</p>
         </div>
-      )}
+        <button 
+          onClick={() => setShowForm(!showForm)}
+          className="toggle-form-button"
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Registrar Nueva Venta
+        </button>
+      </div>
 
+      {/* Tarjetas de estadísticas */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-value total-sales">{totalSales}</div>
+          <div className="stat-label">Total de Ventas</div>
+          <div className="stat-period">Este mes</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value total-revenue">${totalRevenue.toFixed(2)}</div>
+          <div className="stat-label">Ingresos Totales</div>
+          <div className="stat-period">Este mes</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value average-sale">${averagePerSale.toFixed(2)}</div>
+          <div className="stat-label">Promedio por Venta</div>
+          <div className="stat-period">Este mes</div>
+        </div>
+      </div>
+
+      {/* Modal del formulario */}
+      <SaleForm
+        onSaveComplete={handleSaveComplete}
+        onCancelEdit={handleCancel}
+        isOpen={showForm}
+      />
+
+      {/* Sección de lista */}
       <div className="list-section">
+        <div className="section-title">Historial de Ventas</div>
+        
+        {/* Controles de búsqueda y filtros */}
         <div className="list-header">
-            <h3>Historial de Ventas</h3>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Buscar ventas por ID, producto o tienda..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          
+          <div className="filters-container">
+            
             <button onClick={loadSales} className="refresh-button">
-                Actualizar Lista
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar Lista
             </button>
+          </div>
         </div>
         
+        {/* Estados de carga y tabla */}
         {loading ? (
           <p className="state-message loading">Cargando ventas...</p>
         ) : error ? (
           <p className="state-message error">{error}</p>
-        ) : sales.length === 0 ? (
-          <p className="state-message empty">No hay ventas para mostrar.</p>
+        ) : filteredSales.length === 0 ? (
+          <p className="state-message empty">
+            {searchTerm ? "No se encontraron ventas que coincidan con tu búsqueda." : "No hay ventas para mostrar."}
+          </p>
         ) : (
           <div className="table-container">
             <table className="sales-table">
@@ -145,18 +210,35 @@ const SalesList = () => {
                 </tr>
               </thead>
               <tbody>
-                {sales.map((sale) => (
+                {filteredSales.map((sale) => (
                   <tr key={sale.saleId}>
-                    <td>{sale.saleId}</td>
-                    <td>{sale.productName}</td>
-                    <td>{sale.quantity}</td>
-                    <td>${sale.unitPrice.toFixed(2)}</td>
-                    <td>${sale.totalPrice.toFixed(2)}</td>
-                    <td>{sale.storeId}</td>
-                    <td>{sale.userId}</td>
-                    <td>{new Date(sale.timestamp).toLocaleString()}</td>
+                    <td className="sale-id">{sale.saleId}</td>
+                    <td className="product-name">{sale.productName}</td>
+                    <td>
+                      <span className="quantity-badge">{sale.quantity}</span>
+                    </td>
+                    <td className="price-cell">${sale.unitPrice.toFixed(2)}</td>
+                    <td className="total-price">${sale.totalPrice.toFixed(2)}</td>
+                    <td>
+                      <span className="store-id">{sale.storeId}</span>
+                    </td>
+                    <td className="user-id">{sale.userId}</td>
+                    <td className="date-cell">
+                      {new Date(sale.timestamp).toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
                     <td className="actions-cell">
-                      <button onClick={() => handleDelete(sale.saleId)} className="delete-button">Eliminar</button>
+                      <button onClick={() => handleDelete(sale.saleId)} className="delete-button">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}

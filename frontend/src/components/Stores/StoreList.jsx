@@ -1,20 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getAllStores, deleteStore } from "../../api/api";
-import StoreForm from "./StoreForm"; // StoreForm now handles both create and edit
-import "../../Styles/StoreList.css"; // Import the CSS file
+import StoreForm from "./StoreForm";
+import "../../Styles/StoreList.css";
 
 const StoreList = () => {
   const [stores, setStores] = useState([]);
-  const [editingStore, setEditingStore] = useState(null); // Null for create mode, object for edit
+  const [editingStore, setEditingStore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false); // State to control form visibility
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  /**
-   * Fetches all stores from the API.
-   * Handles loading, error, and both possible response formats from the Lambda function.
-   * Using useCallback to memoize for performance.
-   */
   const loadStores = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -45,11 +41,8 @@ const StoreList = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // Empty dependency array means this function is created once
+  }, []);
 
-  /**
-   * Handles the deletion of a store by its ID.
-   */
   const handleDelete = async (storeId) => {
     if (!window.confirm(`¿Estás seguro de que quieres eliminar la tienda con ID ${storeId}?`)) {
       return; 
@@ -68,84 +61,121 @@ const StoreList = () => {
     }
   };
 
-  /**
-   * Effect hook to load stores when the component mounts.
-   */
   useEffect(() => {
     loadStores();
-  }, [loadStores]); // Dependency on memoized loadStores
+  }, [loadStores]);
 
-  // Function to handle opening the form for creation
-  const handleCreateNewStore = () => {
-    setEditingStore(null); // Ensure form is in create mode
-    setShowForm(true); // Show the form
-  };
-
-  // Function to handle opening the form for editing
   const handleEdit = (store) => {
-    setEditingStore(store); // Set the store to be edited
-    setShowForm(true); // Show the form
+    setEditingStore(store);
+    setShowForm(true);
   };
 
-  // Callback when form saves successfully
   const handleSaveComplete = () => {
-    setShowForm(false); // Hide the form
-    setEditingStore(null); // Clear editing state
-    loadStores(); // Reload list
+    setShowForm(false);
+    setEditingStore(null);
+    loadStores();
   };
 
-  // Callback when form is cancelled
   const handleCancelForm = () => {
-    setShowForm(false); // Hide the form
-    setEditingStore(null); // Clear editing state
+    setShowForm(false);
+    setEditingStore(null);
   };
+
+  // Función para filtrar tiendas por búsqueda
+  const filteredStores = stores.filter(store =>
+    store.storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    store.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    store.storeId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calcular estadísticas
+  const totalStores = filteredStores.length;
+  const activeStores = filteredStores.filter(store => store.isActive !== false).length;
+  const totalSales = filteredStores.reduce((sum, store) => sum + (store.totalSales || 0), 0);
+  const totalRevenue = filteredStores.reduce((sum, store) => sum + (store.totalRevenue || 0), 0);
 
   return (
     <div className="store-list-container">
-      <h2>Gestión de Tiendas</h2>
-      
-      {/* Button to toggle the form for creating/editing a store */}
-      <button 
-        onClick={() => {
-          if (showForm) { // If form is currently visible, hide it
-            setShowForm(false);
-            setEditingStore(null); // Clear editing state when hiding
-          } else { // If form is currently hidden, show it for creation
-            handleCreateNewStore();
-          }
-        }} 
-        className="toggle-form-button"
-      >
-        {showForm ? "Ocultar Formulario" : "Crear Nueva Tienda"}
-      </button>
-
-      {/* Conditionally render the StoreForm */}
-      {showForm && (
-        <div className="form-section">
-          <StoreForm 
-            existingStore={editingStore} // Pass the store object for editing, or null for creation
-            onSave={handleSaveComplete} 
-            onCancel={handleCancelForm} 
-          />
+      {/* Header principal */}
+      <div className="main-header">
+        <div className="header-content">
+          <h2>Gestión de Tiendas</h2>
+          <p className="store-subtitle">Administra todas las ubicaciones de tu negocio</p>
         </div>
-      )}
+        <button 
+          onClick={() => {
+            setEditingStore(null);
+            setShowForm(!showForm);
+          }}
+          className="toggle-form-button"
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Crear Nueva Tienda
+        </button>
+      </div>
 
-      {/* Section for the list of stores */}
+      {/* Tarjetas de estadísticas */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon total-stores">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div className="stat-value total-count">{totalStores}</div>
+          <div className="stat-label">Total Tiendas</div>
+        </div>
+        
+        
+        
+      </div>
+
+      {/* Modal del formulario */}
+      <StoreForm
+        existingStore={editingStore}
+        onSave={handleSaveComplete}
+        onCancel={handleCancelForm}
+        isOpen={showForm}
+      />
+
+      {/* Sección de lista */}
       <div className="list-section">
+        <div className="section-title">Listado de Tiendas</div>
+        
+        {/* Controles de búsqueda */}
         <div className="list-header">
-          <h3>Listado de Tiendas</h3>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Buscar tiendas por nombre, dirección o ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          
           <button onClick={loadStores} className="refresh-button">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             Actualizar Lista
           </button>
         </div>
 
-        {/* Conditional rendering for loading, error, and empty states */}
+        {/* Estados de carga y tabla */}
         {loading ? (
           <p className="state-message loading">Cargando tiendas...</p>
         ) : error ? (
           <p className="state-message error">{error}</p>
-        ) : stores.length === 0 ? (
-          <p className="state-message empty">No hay tiendas para mostrar.</p>
+        ) : filteredStores.length === 0 ? (
+          <p className="state-message empty">
+            {searchTerm ? "No se encontraron tiendas que coincidan con tu búsqueda." : "No hay tiendas para mostrar."}
+          </p>
         ) : (
           <div className="table-container">
             <table className="store-table">
@@ -154,20 +184,42 @@ const StoreList = () => {
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>Dirección</th>
-                  <th>Fecha de creación</th>
+
+                  <th>Fecha de Creación</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {stores.map((s) => (
+                {filteredStores.map((s) => (
                   <tr key={s.storeId}>
-                    <td>{s.storeId}</td>
-                    <td>{s.storeName}</td>
-                    <td>{s.address}</td>
-                    <td>{s.createdAt ? new Date(s.createdAt).toLocaleString() : 'N/A'}</td>
+                    <td className="store-id-cell">
+                      <span className="store-id-badge">{s.storeId}</span>
+                    </td>
+                    <td className="store-name">{s.storeName}</td>
+                    <td className="store-address">{s.address}</td>
+                    
+                    <td className="date-cell">
+                      {s.createdAt ? new Date(s.createdAt).toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'N/A'}
+                    </td>
                     <td className="actions-cell">
-                      <button onClick={() => handleEdit(s)} className="edit-button">Editar</button>
-                      <button onClick={() => handleDelete(s.storeId)} className="delete-button">Eliminar</button>
+                      <button onClick={() => handleEdit(s)} className="edit-button">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Editar
+                      </button>
+                      <button onClick={() => handleDelete(s.storeId)} className="delete-button">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}

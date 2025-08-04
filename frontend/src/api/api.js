@@ -3,7 +3,7 @@ const API_BASE = "";
 
 //login
 export const loginUser = (email, password) =>
-  fetch(`/login`, {
+  fetch(`${API_BASE}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
